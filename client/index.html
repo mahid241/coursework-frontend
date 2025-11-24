@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>After School Lessons</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+        .search-box, .sort-box {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        .cart-btn {
+            background: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .cart-btn:hover {
+            background: #45a049;
+        }
+        .lessons-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .lesson-card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .lesson-card h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .lesson-card p {
+            color: #666;
+            margin: 5px 0;
+        }
+        .add-btn {
+            background: #2196F3;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+            width: 100%;
+        }
+        .add-btn:hover {
+            background: #0b7dda;
+        }
+        .add-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .cart-section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .checkout-form {
+            margin-top: 20px;
+        }
+        .checkout-form input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .checkout-btn {
+            background: #FF5722;
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+        }
+        .checkout-btn:hover {
+            background: #E64A19;
+        }
+        .message {
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            background: #4CAF50;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div class="container">
+            <h1>After School Lessons</h1>
+            
+            <!-- Show Lessons or Cart -->
+            <div v-if="!showCart">
+                <div class="controls">
+                    <input 
+                        type="text" 
+                        v-model="searchQuery" 
+                        placeholder="Search lessons..." 
+                        class="search-box"
+                    >
+                    <select v-model="sortBy" class="sort-box">
+                        <option value="">Sort by</option>
+                        <option value="topic">Subject</option>
+                        <option value="location">Location</option>
+                        <option value="price">Price</option>
+                        <option value="spaces">Availability</option>
+                    </select>
+                    <select v-model="sortOrder" class="sort-box">
+                        <option value="asc">Ascending</option>
+                        <option value="desc">Descending</option>
+                    </select>
+                    <button class="cart-btn" @click="showCart = true" :disabled="cart.length === 0">
+                        View Cart ({{ cart.length }})
+                    </button>
+                </div>
+
+                <div class="lessons-grid">
+                    <div v-for="lesson in filteredLessons" :key="lesson.id" class="lesson-card">
+                        <h3>{{ lesson.topic }}</h3>
+                        <p><strong>Location:</strong> {{ lesson.location }}</p>
+                        <p><strong>Price:</strong> £{{ lesson.price }}</p>
+                        <p><strong>Spaces:</strong> {{ lesson.spaces }}</p>
+                        <button 
+                            class="add-btn" 
+                            @click="addToCart(lesson)"
+                            :disabled="lesson.spaces === 0"
+                        >
+                            {{ lesson.spaces === 0 ? 'Sold Out' : 'Add to Cart' }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cart View -->
+            <div v-else class="cart-section">
+                <h2>Shopping Cart</h2>
+                <button class="cart-btn" @click="showCart = false" style="margin-bottom: 20px;">
+                    Back to Lessons
+                </button>
+
+                <div v-if="cart.length === 0">
+                    <p>Your cart is empty</p>
+                </div>
+
+                <div v-else>
+                    <div v-for="(item, index) in cart" :key="index" class="cart-item">
+                        <span>{{ item.topic }} - {{ item.location }}</span>
+                        <span>£{{ item.price }}</span>
+                        <button @click="removeFromCart(index)" style="color: red; cursor: pointer;">Remove</button>
+                    </div>
+
+                    <div class="checkout-form">
+                        <h3>Checkout</h3>
+                        <input type="text" v-model="name" placeholder="Your Name" required>
+                        <input type="tel" v-model="phone" placeholder="Phone Number" required>
+                        <button class="checkout-btn" @click="checkout" :disabled="!name || !phone">
+                            Complete Purchase
+                        </button>
+                        <div v-if="orderMessage" class="message">{{ orderMessage }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
