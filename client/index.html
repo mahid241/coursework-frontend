@@ -137,11 +137,12 @@
         <div class="container">
             <h1>After School Lessons</h1>
             <h2>Find and Book Lessons</h2>
-            <ul>
+            
                 <li>Lesson 1 - Placeholder</li>
                 <li>Lesson 2 - Placeholder</li>
                 <li>Lesson 3 - Placeholder</li>
-            </ul>
+            
+
             <!-- Show Lessons or Cart -->
             <div v-if="!showCart">
                 <div class="controls">
@@ -166,6 +167,7 @@
                         View Cart ({{ cart.length }})
                     </button>
                 </div>
+
                 <div class="lessons-grid">
                     <div v-for="lesson in filteredLessons" :key="lesson.id" class="lesson-card">
                         <h3>{{ lesson.topic }}</h3>
@@ -182,21 +184,25 @@
                     </div>
                 </div>
             </div>
+
             <!-- Cart View -->
             <div v-else class="cart-section">
                 <h2>Shopping Cart</h2>
                 <button class="cart-btn" @click="showCart = false" style="margin-bottom: 20px;">
                     Back to Lessons
                 </button>
+
                 <div v-if="cart.length === 0">
                     <p>Your cart is empty</p>
                 </div>
+
                 <div v-else>
                     <div v-for="(item, index) in cart" :key="index" class="cart-item">
                         <span>{{ item.topic }} - {{ item.location }}</span>
                         <span>£{{ item.price }}</span>
                         <button @click="removeFromCart(index)" style="color: red; cursor: pointer;">Remove</button>
                     </div>
+
                     <div class="checkout-form">
                         <h3>Checkout</h3>
                         <input type="text" v-model="name" placeholder="Your Name" required>
@@ -210,10 +216,13 @@
             </div>
         </div>
     </div>
+
     
     <footer style="text-align:center; padding:15px; color:#999;">
       &copy; 2025 After School Lessons. All rights reserved.
     </footer>
+    
+
     <script src="app.js"></script>
 </body>
 </html>
