@@ -72,6 +72,14 @@ createApp({
             }
             this.cart.splice(index, 1);
         },
+        clearCart() {
+            // Restore lesson spaces before clearing
+            for (const item of this.cart) {
+                const lesson = this.lessons.find(l => l.id === item.id);
+                if (lesson) lesson.spaces++;
+            }
+            this.cart = [];
+        },
         async checkout() {
             if (!this.validateName(this.name)) {
                 alert('Name must contain only letters and spaces');
