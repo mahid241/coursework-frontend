@@ -53,7 +53,13 @@ createApp({
         async fetchLessons() {
             try {
                 const response = await fetch('http://localhost:3000/lessons');
-                this.lessons = await response.json();
+                let lessons = await response.json();
+                // Ensure a minimum of 5 spaces for every lesson
+                lessons = lessons.map(l => ({
+                    ...l,
+                    spaces: l.spaces < 5 ? 5 : l.spaces
+                }));
+                this.lessons = lessons;
             } catch (error) {
                 console.error('Error fetching lessons:', error);
             }
